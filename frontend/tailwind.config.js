@@ -1,0 +1,73 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './app/**/*.{js,jsx,ts,tsx}',
+    './src/components/**/*.{js,jsx,ts,tsx}',
+  ],
+  presets: [require('nativewind/preset')],
+  theme: {
+    extend: {
+      colors: {
+        brown: {
+          50: '#FAF5F0',
+          100: '#F0E6D8',
+          200: '#DEC9B0',
+          300: '#C9A882',
+          400: '#B8875A',
+          500: '#9D6E42',
+          600: '#7D5430',
+          700: '#5E3D21',
+          800: '#3E2812',
+          900: '#1F1409',
+        },
+        blue: {
+          50: '#F0F6FF',
+          100: '#DCE9FF',
+          200: '#B8D3FF',
+          300: '#8AB6FF',
+          400: '#5C95F5',
+          500: '#3B7AF0',
+          600: '#2460D9',
+          700: '#1A4AB0',
+          800: '#12347F',
+          900: '#0A1E4E',
+        },
+        neutral: {
+          50: '#FAFAF8',
+          100: '#F5F3EF',
+          200: '#EAE6DF',
+          300: '#D6D0C7',
+          400: '#B8B0A5',
+          500: '#8C8478',
+          600: '#6B6358',
+          700: '#4A4340',
+          800: '#2E2A28',
+          900: '#1A1715',
+        },
+        success: '#2D9E75',
+        warning: '#D4870A',
+        danger: '#C0392B',
+        info: '#3B7AF0',
+      },
+      fontFamily: {
+        inter: ['Inter_400Regular', 'Inter_500Medium', 'Inter_600SemiBold', 'Inter_700Bold'],
+      },
+      borderRadius: {
+        sm: '8px',
+        md: '12px',
+        lg: '16px',
+        xl: '24px',
+      },
+      spacing: {
+        xs: '4px',
+        sm: '8px',
+        md: '12px',
+        lg: '16px',
+        xl: '24px',
+        '2xl': '32px',
+        '3xl': '48px',
+      },
+    },
+  },
+  plugins: [],
+}

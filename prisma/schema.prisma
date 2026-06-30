@@ -1,0 +1,453 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Country {
+  GH
+  GN
+}
+
+enum UserRole {
+  PATIENT
+  DOCTOR
+  PHARMACIST
+  ADMIN
+}
+
+enum BloodGroup {
+  A_POS
+  A_NEG
+  B_POS
+  B_NEG
+  O_POS
+  O_NEG
+  AB_POS
+  AB_NEG
+}
+
+enum ConsultationStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum VitalType {
+  HEART_RATE
+  BLOOD_PRESSURE
+  GLUCOSE
+  SPO2
+  TEMPERATURE
+  WEIGHT
+}
+
+enum VitalStatus {
+  NORMAL
+  WARNING
+  CRITICAL
+}
+
+enum RecordType {
+  CONSULTATION
+  LAB_RESULT
+  PRESCRIPTION
+  HOSPITALIZATION
+  IMAGING
+  VACCINATION
+}
+
+enum MedicationForm {
+  TABLET
+  CAPSULE
+  SYRUP
+  INJECTION
+  CREAM
+  DROPS
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+enum InsuranceProvider {
+  NHIS
+  NSIA
+}
+
+model User {
+  id              String     @id @default(cuid())
+  email           String     @unique
+  phone           String     @unique
+  passwordHash    String
+  role            UserRole   @default(PATIENT)
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime?
+  bloodGroup      BloodGroup?
+  country         Country
+  city            String?
+  avatarUrl       String?
+  isEmailVerified Boolean    @default(false)
+  isPhoneVerified Boolean    @default(false)
+  isActive        Boolean    @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  refreshTokens   RefreshToken[]
+  otpCodes        OtpCode[]
+  doctorProfile   Doctor?
+  patientProfile  Patient?
+  notifications   Notification[]
+  sentMessages    Message[]     @relation("SentMessages")
+
+  @@index([email])
+  @@index([phone])
+  @@index([country])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  code      String
+  userId    String
+  type      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model Patient {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  nhisNumber    String? @unique
+  nsiaNumber    String? @unique
+  emergencyName String?
+  emergencyPhone String?
+  allergies     String[]
+  chronicConditions String[]
+
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vitals        VitalSign[]
+  records       MedicalRecord[]
+  medications   Medication[]
+  orders        Order[]
+  insurances    Insurance[]
+  consultationsAsPatient Consultation[] @relation("PatientConsultations")
+
+  @@index([userId])
+}
+
+model Doctor {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  specialty        String
+  licenseNumber    String   @unique
+  hospital         String
+  city             String
+  country          Country
+  bio              String?
+  consultationFee  Decimal  @db.Decimal(10, 2)
+  currency         String
+  isOnline         Boolean  @default(false)
+  acceptsNHIS      Boolean  @default(false)
+  languages        String[]
+  rating           Decimal  @default(0) @db.Decimal(3, 2)
+  reviewCount      Int      @default(0)
+  yearsExperience  Int      @default(0)
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availabilities   DoctorAvailability[]
+  consultations    Consultation[] @relation("DoctorConsultations")
+
+  @@index([country, specialty])
+  @@index([isOnline])
+}
+
+model DoctorAvailability {
+  id        String   @id @default(cuid())
+  doctorId  String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isActive  Boolean  @default(true)
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId])
+}
+
+model Consultation {
+  id           String             @id @default(cuid())
+  patientId    String
+  doctorId     String
+  status       ConsultationStatus @default(SCHEDULED)
+  scheduledAt  DateTime
+  startedAt    DateTime?
+  endedAt      DateTime?
+  durationMin  Int?
+  notes        String?
+  diagnosis    String?
+  prescription String?
+  fee          Decimal            @db.Decimal(10, 2)
+  currency     String
+  isPaidByNHIS Boolean            @default(false)
+  roomId       String?            @unique
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  patient      Patient  @relation("PatientConsultations", fields: [patientId], references: [id])
+  doctor       Doctor   @relation("DoctorConsultations",  fields: [doctorId],  references: [id])
+  messages     Message[]
+  review       ConsultationReview?
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([scheduledAt])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  consultationId String
+  senderId       String
+  content        String
+  type           String   @default("TEXT")
+  fileUrl        String?
+  readAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@index([consultationId])
+}
+
+model ConsultationReview {
+  id             String   @id @default(cuid())
+  consultationId String   @unique
+  rating         Int
+  comment        String?
+  createdAt      DateTime @default(now())
+
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+}
+
+model VitalSign {
+  id          String      @id @default(cuid())
+  patientId   String
+  type        VitalType
+  valueJson   Json
+  unit        String
+  status      VitalStatus @default(NORMAL)
+  deviceId    String?
+  measuredAt  DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+
+  patient     Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, type])
+  @@index([patientId, measuredAt])
+}
+
+model MedicalRecord {
+  id          String     @id @default(cuid())
+  patientId   String
+  type        RecordType
+  title       String
+  doctorName  String
+  hospital    String
+  summary     String?
+  date        DateTime
+  fileUrls    String[]
+  tags        String[]
+  isShared    Boolean    @default(false)
+  sharedWith  String[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  patient     Patient    @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, type])
+  @@index([patientId, date])
+}
+
+model Medication {
+  id              String         @id @default(cuid())
+  patientId       String
+  name            String
+  dosage          String
+  form            MedicationForm
+  frequency       String
+  times           String[]
+  startDate       DateTime
+  endDate         DateTime?
+  refillDate      DateTime?
+  stockRemaining  Int            @default(0)
+  prescribedBy    String
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  patient         Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  intakes         MedicationIntake[]
+
+  @@index([patientId, isActive])
+}
+
+model MedicationIntake {
+  id           String     @id @default(cuid())
+  medicationId String
+  scheduledAt  DateTime
+  takenAt      DateTime?
+  skipped      Boolean    @default(false)
+  note         String?
+
+  medication   Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+
+  @@index([medicationId, scheduledAt])
+}
+
+model Pharmacy {
+  id           String   @id @default(cuid())
+  name         String
+  address      String
+  city         String
+  country      Country
+  phone        String
+  latitude     Decimal  @db.Decimal(10, 7)
+  longitude    Decimal  @db.Decimal(10, 7)
+  isOpen       Boolean  @default(false)
+  isOnDuty     Boolean  @default(false)
+  openingHours String
+  acceptsNHIS  Boolean  @default(false)
+  rating       Decimal  @default(0) @db.Decimal(3, 2)
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  stock        PharmacyStock[]
+  orderItems   OrderItem[]
+
+  @@index([country, city])
+}
+
+model PharmacyStock {
+  id             String   @id @default(cuid())
+  pharmacyId     String
+  medicationName String
+  genericName    String?
+  available      Boolean  @default(true)
+  quantity       Int      @default(0)
+  price          Decimal  @db.Decimal(10, 2)
+  currency       String
+  updatedAt      DateTime @updatedAt
+
+  pharmacy       Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+
+  @@unique([pharmacyId, medicationName])
+  @@index([medicationName])
+  @@index([pharmacyId])
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  patientId        String
+  status           OrderStatus @default(PENDING)
+  totalAmount      Decimal     @db.Decimal(10, 2)
+  currency         String
+  deliveryAddress  String
+  deliveryLat      Decimal?    @db.Decimal(10, 7)
+  deliveryLng      Decimal?    @db.Decimal(10, 7)
+  courierName      String?
+  courierPhone     String?
+  courierLat       Decimal?    @db.Decimal(10, 7)
+  courierLng       Decimal?    @db.Decimal(10, 7)
+  estimatedMinutes Int?
+  isPaidByNHIS     Boolean     @default(false)
+  notes            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  patient          Patient     @relation(fields: [patientId], references: [id])
+  items            OrderItem[]
+
+  @@index([patientId])
+  @@index([status])
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  pharmacyId     String
+  medicationName String
+  quantity       Int
+  unitPrice      Decimal  @db.Decimal(10, 2)
+  currency       String
+
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  pharmacy       Pharmacy @relation(fields: [pharmacyId], references: [id])
+
+  @@index([orderId])
+}
+
+model Insurance {
+  id                String            @id @default(cuid())
+  patientId         String
+  provider          InsuranceProvider
+  memberNumber      String            @unique
+  holderName        String
+  validFrom         DateTime
+  validUntil        DateTime
+  annualLimit       Decimal           @db.Decimal(12, 2)
+  usedAmount        Decimal           @default(0) @db.Decimal(12, 2)
+  currency          String
+  cardImageUrl      String?
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  patient           Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  type      String
+  data      Json?
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}

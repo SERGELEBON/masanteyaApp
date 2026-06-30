@@ -1,0 +1,91 @@
+{
+  "expo": {
+    "name": "MaSanteYa",
+    "slug": "masanteya-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#B8875A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.masanteya.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "MaSanteYa a besoin d'accéder à votre caméra pour les consultations vidéo.",
+        "NSLocationWhenInUseUsageDescription": "MaSanteYa a besoin de votre position pour trouver les pharmacies proches.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "MaSanteYa a besoin de votre position pour trouver les pharmacies proches.",
+        "NSPhotoLibraryUsageDescription": "MaSanteYa a besoin d'accéder à vos photos pour uploader des documents médicaux.",
+        "NSFaceIDUsageDescription": "MaSanteYa utilise Face ID pour sécuriser votre connexion."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#B8875A"
+      },
+      "package": "com.masanteya.app",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_KEY}"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "MaSanteYa a besoin de votre position pour trouver les pharmacies proches."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "MaSanteYa utilise Face ID pour sécuriser votre connexion."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "MaSanteYa a besoin d'accéder à votre caméra pour les consultations vidéo."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#B8875A"
+        }
+      ]
+    ],
+    "scheme": "masanteya",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}
