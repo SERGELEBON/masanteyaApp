@@ -10,8 +10,8 @@ export interface AuthRequest extends Request {
 }
 
 export interface MulterRequest extends AuthRequest {
-  file?: Express.Multer.File
-  files?: Express.Multer.File[]
+  file?: any
+  files?: any[]
 }
 
 export type UserRole = 'PATIENT' | 'DOCTOR' | 'PHARMACIST' | 'ADMIN'

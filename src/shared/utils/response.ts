@@ -36,7 +36,7 @@ export class ApiResponse {
     const response: ApiErrorResponse = {
       success: false,
       message,
-      ...(errors && { errors }),
+      ...(errors ? { errors } : {}),
     }
     return res.status(statusCode).json(response)
   }

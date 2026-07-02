@@ -48,7 +48,7 @@ export class AuthService {
         country: data.country,
         city: data.city,
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
-        bloodGroup: data.bloodGroup as any,
+        bloodGroup: (data.bloodGroup as any) || null,
       },
     })
 
@@ -218,8 +218,8 @@ export class AuthService {
     await prisma.refreshToken.delete({ where: { token: refreshToken } }).catch(() => {})
 
     const payload = JwtHelper.decodeToken(accessToken)
-    if (payload) {
-      const exp = (payload as any).exp
+    if (payload && payload.exp) {
+      const exp = payload.exp
       const now = Math.floor(Date.now() / 1000)
       const ttl = exp - now
 

@@ -6,19 +6,23 @@ export interface JwtPayload {
   role: string
   country: string
   email: string
+  exp?: number
+  iat?: number
 }
 
+type JwtPayloadInput = Omit<JwtPayload, 'exp' | 'iat'>
+
 export class JwtHelper {
-  static generateAccessToken(payload: JwtPayload): string {
+  static generateAccessToken(payload: JwtPayloadInput): string {
     return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
       expiresIn: env.JWT_ACCESS_EXPIRY,
-    })
+    } as jwt.SignOptions)
   }
 
-  static generateRefreshToken(payload: JwtPayload): string {
+  static generateRefreshToken(payload: JwtPayloadInput): string {
     return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
       expiresIn: env.JWT_REFRESH_EXPIRY,
-    })
+    } as jwt.SignOptions)
   }
 
   static verifyAccessToken(token: string): JwtPayload {

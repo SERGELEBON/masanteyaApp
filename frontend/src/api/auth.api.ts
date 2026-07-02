@@ -15,6 +15,22 @@ export const authApi = {
     return data.data
   },
 
+  verifyOtp: async (code: string, type: 'email' | 'phone') => {
+    const endpoint = type === 'email' ? '/auth/verify-email' : '/auth/verify-phone'
+    const otpType = type === 'email' ? 'EMAIL_VERIFY' : 'PHONE_VERIFY'
+    const { data } = await apiClient.post<ApiResponse<{ message: string }>>(endpoint, {
+      code,
+      type: otpType,
+    })
+    return data.data
+  },
+
+  resendOtp: async (type: 'email' | 'phone') => {
+    const otpType = type === 'email' ? 'EMAIL_VERIFY' : 'PHONE_VERIFY'
+    const { data } = await apiClient.post<ApiResponse<{ message: string }>>('/auth/resend-otp', { type: otpType })
+    return data.data
+  },
+
   logout: async (refreshToken: string) => {
     const { data } = await apiClient.post<ApiResponse<{ message: string }>>('/auth/logout', { refreshToken })
     return data.data

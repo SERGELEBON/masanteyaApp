@@ -18,7 +18,7 @@ export class NotificationService {
           title: params.title,
           body: params.body,
           type: params.type,
-          data: params.data || {},
+          data: (params.data as any) || {},
         },
       })
 

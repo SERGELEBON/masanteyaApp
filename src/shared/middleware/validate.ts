@@ -3,7 +3,7 @@ import { AnyZodObject, ZodError } from 'zod'
 import { ApiResponse } from '../utils/response'
 
 export function validate(schema: AnyZodObject) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       await schema.parseAsync({
         body: req.body,
@@ -17,7 +17,8 @@ export function validate(schema: AnyZodObject) {
           path: err.path.join('.'),
           message: err.message,
         }))
-        return ApiResponse.error(res, 'Validation échouée', 400, errors)
+        ApiResponse.error(res, 'Validation échouée', 400, errors)
+        return
       }
       next(error)
     }

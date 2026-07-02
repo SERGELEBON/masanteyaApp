@@ -16,6 +16,7 @@ export interface User {
   avatarUrl?: string
   isEmailVerified: boolean
   isPhoneVerified: boolean
+  verified?: boolean
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -97,6 +98,7 @@ export interface VitalSign {
   status: VitalStatus
   deviceId?: string
   measuredAt: string
+  recordedAt?: string
   createdAt: string
 }
 

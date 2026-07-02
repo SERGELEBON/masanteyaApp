@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import 'dotenv/config'
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -6,8 +7,8 @@ const envSchema = z.object({
   APP_NAME: z.string().default('MaSanteYa API'),
   APP_URL: z.string().url().optional(),
   FRONTEND_URL: z.string().optional(),
-  DATABASE_URL: z.string().url(),
-  DIRECT_URL: z.string().url().optional(),
+  DATABASE_URL: z.string().min(1),
+  DIRECT_URL: z.string().optional(),
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
   JWT_ACCESS_EXPIRY: z.string().default('15m'),

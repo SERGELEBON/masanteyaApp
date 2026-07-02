@@ -21,6 +21,8 @@ interface AuthState {
 
   login: (email: string, password: string) => Promise<void>
   register: (data: RegisterPayload) => Promise<{ userId: string; message: string }>
+  verifyOtp: (code: string, type: 'email' | 'phone') => Promise<void>
+  resendOtp: (type: 'email' | 'phone') => Promise<void>
   logout: () => Promise<void>
   setUser: (user: User) => void
   clearError: () => void
@@ -77,6 +79,34 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setUser: (user) => set({ user }),
+
+      verifyOtp: async (code, type) => {
+        set({ isLoading: true, error: null })
+        try {
+          await authApi.verifyOtp(code, type)
+          set({ isLoading: false })
+        } catch (err: any) {
+          set({
+            error: err.response?.data?.message ?? 'Code invalide',
+            isLoading: false
+          })
+          throw err
+        }
+      },
+
+      resendOtp: async (type) => {
+        set({ isLoading: true, error: null })
+        try {
+          await authApi.resendOtp(type)
+          set({ isLoading: false })
+        } catch (err: any) {
+          set({
+            error: err.response?.data?.message ?? 'Erreur d\'envoi',
+            isLoading: false
+          })
+          throw err
+        }
+      },
 
       clearError: () => set({ error: null }),
     }),

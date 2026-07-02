@@ -3,13 +3,15 @@ import { AuthRequest, UserRole } from '../types'
 import { ApiResponse } from '../utils/response'
 
 export function authorize(...roles: UserRole[]) {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      return ApiResponse.unauthorized(res)
+      ApiResponse.unauthorized(res)
+      return
     }
 
     if (!roles.includes(req.user.role as UserRole)) {
-      return ApiResponse.forbidden(res, 'Accès refusé')
+      ApiResponse.forbidden(res, 'Accès refusé')
+      return
     }
 
     next()

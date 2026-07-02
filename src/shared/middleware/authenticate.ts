@@ -5,19 +5,21 @@ import { ApiResponse } from '../utils/response'
 import { CacheService } from '../services/cache.service'
 import { prisma } from '../../config/database'
 
-export async function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+export async function authenticate(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const authHeader = req.headers.authorization
 
     if (!authHeader?.startsWith('Bearer ')) {
-      return ApiResponse.unauthorized(res, 'Token manquant')
+      ApiResponse.unauthorized(res, 'Token manquant')
+      return
     }
 
     const token = authHeader.slice(7)
 
     const isBlacklisted = await CacheService.get<string>(`blacklist:${token}`)
     if (isBlacklisted) {
-      return ApiResponse.unauthorized(res, 'Session expirée')
+      ApiResponse.unauthorized(res, 'Session expirée')
+      return
     }
 
     const payload = JwtHelper.verifyAccessToken(token)
@@ -32,7 +34,8 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
       })
 
       if (!user?.isActive) {
-        return ApiResponse.unauthorized(res, 'Compte désactivé')
+        ApiResponse.unauthorized(res, 'Compte désactivé')
+        return
       }
 
       await CacheService.set(cacheKey, true, 300)
@@ -40,7 +43,8 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
     }
 
     if (!isActive) {
-      return ApiResponse.unauthorized(res, 'Compte désactivé')
+      ApiResponse.unauthorized(res, 'Compte désactivé')
+      return
     }
 
     req.user = {
@@ -52,6 +56,6 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
 
     next()
   } catch (error) {
-    return ApiResponse.unauthorized(res, 'Token invalide ou expiré')
+    ApiResponse.unauthorized(res, 'Token invalide ou expiré')
   }
 }

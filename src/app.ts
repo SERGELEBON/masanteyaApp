@@ -62,7 +62,7 @@ export function createApp() {
   app.use('/api/v1/insurance', insuranceRouter)
   app.use('/api/v1/pharmfind', pharmfindRouter)
 
-  app.use((req, res) => res.status(404).json({ message: 'Route introuvable' }))
+  app.use((_req, res) => res.status(404).json({ message: 'Route introuvable' }))
 
   app.use(errorHandler)
 
