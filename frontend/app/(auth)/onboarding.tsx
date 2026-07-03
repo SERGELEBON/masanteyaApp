@@ -23,21 +23,21 @@ const { width } = Dimensions.get('window')
 const slides = [
   {
     id: '1',
-    title: 'Bienvenue sur MaSanteYa',
-    description: 'Votre santé, notre priorité. Accédez à des soins de qualité au Ghana et en Guinée.',
+    title: "L'Excellence Médicale\nAccessible",
+    description: 'Une plateforme conçue pour le paysage de santé ouest-africain, alliant technologie moderne et chaleur humaine.',
     icon: 'medical' as const,
   },
   {
     id: '2',
-    title: 'Services de Santé Complets',
-    description: 'Consultations virtuelles, suivi de santé, dossiers médicaux, et bien plus encore.',
-    icon: 'fitness' as const,
+    title: 'Consultations\nVidéo 24/7',
+    description: 'Connectez-vous avec des médecins qualifiés à tout moment, depuis le confort de votre maison.',
+    icon: 'videocam' as const,
   },
   {
     id: '3',
-    title: 'Commencez Maintenant',
-    description: 'Créez votre compte et accédez à tous nos services de santé en quelques minutes.',
-    icon: 'checkmark-circle' as const,
+    title: 'Trouvez Votre\nPharmacie',
+    description: 'Localisez les pharmacies à proximité, vérifiez la disponibilité des médicaments et commandez en ligne.',
+    icon: 'medkit' as const,
   },
 ]
 

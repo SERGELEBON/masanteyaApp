@@ -1,8 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
+import ws from 'ws'
 import { env } from '../../config/env'
 import { logger } from '../../config/logger'
 
-const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
+const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, {
+  realtime: {
+    transport: ws as any,
+  },
+})
 
 export interface UploadFileParams {
   bucket?: string
